@@ -1,0 +1,74 @@
+{
+  "name": "screener-india",
+  "version": "1.0.0",
+  "description": "Unofficial Node.js/TypeScript client for Screener.in – access Indian stock market fundamentals, sectors, and screens",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "clean": "del lib",
+    "build": "tsc --project tsconfig.build.json",
+    "prepack": "npm run clean && npm run build",
+    "test": "node --import tsx/esm --test tests/**/*.test.ts",
+    "test:coverage": "node --import tsx/esm --experimental-test-coverage --test tests/**/*.test.ts",
+    "lint": "eslint src tests",
+    "lint:fix": "eslint src tests --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "screener",
+    "screener.in",
+    "india",
+    "stocks",
+    "finance",
+    "nse",
+    "bse",
+    "fundamentals",
+    "stock-market"
+  ],
+  "author": {
+    "name": "Sahil Jani",
+    "url": "https://github.com/sahiljani"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "fast-xml-parser": "^4.4.0",
+    "node-html-parser": "^6.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "del-cli": "^5.1.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sahiljani/screener-india.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sahiljani/screener-india/issues"
+  },
+  "homepage": "https://github.com/sahiljani/screener-india#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
