@@ -24,6 +24,19 @@ export interface ClientConfig {
   timeoutMs?: number;
   /** Optional proxy URL (http/https/socks) */
   proxyUrl?: string;
+  /**
+   * Session cookie string from a logged-in screener.in browser session.
+   * Required to access protected pages (screens, some company data).
+   *
+   * How to get it:
+   *   1. Log in at https://www.screener.in/login/
+   *   2. Open DevTools → Application → Cookies → www.screener.in
+   *   3. Copy the value of the `sessionid` cookie
+   *   4. Pass it here as: "sessionid=YOUR_VALUE_HERE"
+   *
+   * You can also include csrftoken: "sessionid=abc; csrftoken=xyz"
+   */
+  cookies?: string;
 }
 
 // --------------- shared response envelope ---------------

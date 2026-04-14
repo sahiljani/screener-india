@@ -16,6 +16,8 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: numb
 }
 
 function shouldRetry(err: unknown): boolean {
+  // Never retry login/auth errors — they won't resolve with more attempts
+  if (err instanceof Error && err.message.startsWith("LOGIN_REQUIRED")) return false;
   if (axios.isAxiosError(err)) {
     const status = err.response?.status;
     return !status || status === 429 || status >= 500;

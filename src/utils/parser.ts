@@ -123,25 +123,33 @@ export function parsePeers(root: HTMLElement): PeerRow[] {
 export function parseSectorLinks(
   root: HTMLElement,
 ): Array<{ name: string; slug: string; url: string }> {
+  // Screener.in uses deep hierarchical paths: /market/IN02/IN0201/IN020101/IN020101002/
+  // We extract the full path after /market/ as the slug so getSectorData can use it directly.
   const links = root.querySelectorAll("a[href*='/market/']");
   const seen = new Set<string>();
   const result: Array<{ name: string; slug: string; url: string }> = [];
 
   links.forEach((a) => {
     const href = a.getAttribute("href") ?? "";
-    const match = href.match(/\/market\/([^/?#]+)/);
+    const match = href.match(/\/market\/(.+?)\/?$/);
     if (!match) return;
-    const slug = match[1];
+    const name = a.text.trim();
+    if (!name) return; // skip nav links with no label
+    const slug = match[1].replace(/\/$/, ""); // e.g. IN02/IN0201/IN020101/IN020101002
     if (seen.has(slug)) return;
     seen.add(slug);
     result.push({
-      name: a.text.trim() || slug,
+      name,
       slug,
       url: href.startsWith("http") ? href : `https://www.screener.in${href}`,
     });
   });
 
   return result;
+}
+
+function normalizeCell(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
 }
 
 export function parseDataTable(root: HTMLElement): {
@@ -156,18 +164,27 @@ export function parseDataTable(root: HTMLElement): {
   if (!table) return { columns: [], rows: [] };
 
   const columns: string[] = [];
-  const headerRow = table.querySelector("thead tr");
+
+  // Screener.in puts the header row inside tbody (th cells in the first tr)
+  // Try thead first, fall back to first tr with th elements
+  const theadRow = table.querySelector("thead tr");
+  const firstTbodyRow = table.querySelector("tbody tr");
+  const headerRow =
+    theadRow ?? (firstTbodyRow?.querySelectorAll("th").length ? firstTbodyRow : null);
+
   if (headerRow) {
-    headerRow.querySelectorAll("th").forEach((th) => columns.push(th.text.trim()));
+    headerRow.querySelectorAll("th").forEach((th) => columns.push(normalizeCell(th.text)));
   }
 
   const rows: TableRow[] = [];
   table.querySelectorAll("tbody tr").forEach((tr) => {
+    // Skip the header row if it lives inside tbody
+    if (tr === firstTbodyRow && tr.querySelectorAll("th").length > 0) return;
     const cells = tr.querySelectorAll("td");
     if (cells.length === 0) return;
     const row: TableRow = {};
     cells.forEach((cell, i) => {
-      row[columns[i] ?? `col_${i}`] = cell.text.trim();
+      row[columns[i] ?? `col_${i}`] = normalizeCell(cell.text);
     });
     rows.push(row);
   });
@@ -198,20 +215,30 @@ export function parseScreenItems(root: HTMLElement): Array<{
 }> {
   const items: ReturnType<typeof parseScreenItems> = [];
 
-  root.querySelectorAll("ul.card-list li, ul.items li").forEach((li) => {
-    const anchor = li.querySelector("a[href]");
-    if (!anchor) return;
-
+  // Screener.in puts title + description inside the same anchor, separated by \n
+  // e.g. "Highest Dividend Yield Shares\n      Stocks that have been consistently paying…"
+  root.querySelectorAll("a[href*='/screens/']").forEach((anchor) => {
     const href = anchor.getAttribute("href") ?? "";
     const match = href.match(/\/screens\/(\d+)\/([^/?#]+)/);
     if (!match) return;
 
-    const descEl = li.querySelector("p, .description, small");
+    const rawText = anchor.text;
+    const parts = rawText
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const title = parts[0] ?? "";
+    // Description may be inline (newline-separated in anchor) or in a sibling <p>
+    const description =
+      parts.length > 1
+        ? parts.slice(1).join(" ").trim()
+        : ((anchor.parentNode as HTMLElement | null)?.querySelector("p")?.text.trim() ?? "");
+
     items.push({
       id: parseInt(match[1], 10),
       slug: match[2],
-      title: anchor.text.trim(),
-      description: descEl?.text.trim() ?? "",
+      title,
+      description,
       url: href.startsWith("http") ? href : `https://www.screener.in${href}`,
     });
   });
