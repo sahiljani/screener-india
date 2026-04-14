@@ -1,6 +1,6 @@
 {
   "name": "screener-india",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial Node.js/TypeScript client for Screener.in – access Indian stock market fundamentals, sectors, and screens",
   "type": "module",
   "main": "./lib/index.js",

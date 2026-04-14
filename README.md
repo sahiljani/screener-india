@@ -1,5 +1,7 @@
 # screener-india
 
+> **Disclaimer:** This is an **unofficial, independently maintained** package. It is not affiliated with, endorsed by, or connected to [Screener.in](https://www.screener.in) in any way. Use it responsibly and in accordance with Screener.in's [Privacy Policy](https://www.screener.in/guides/privacy/). This is not financial advice.
+
 [![npm version](https://img.shields.io/npm/v/screener-india.svg)](https://www.npmjs.com/package/screener-india)
 [![npm downloads](https://img.shields.io/npm/dm/screener-india.svg)](https://www.npmjs.com/package/screener-india)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -30,7 +32,6 @@ Fetch real-time and historical **Indian stock fundamentals**, **NSE/BSE financia
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Authentication](#authentication)
 - [API Reference](#api-reference)
   - [getCompany](#getccompany)
   - [getCompanyTab](#getcompanytab)
@@ -44,6 +45,7 @@ Fetch real-time and historical **Indian stock fundamentals**, **NSE/BSE financia
 - [Configuration](#configuration)
 - [TypeScript Types](#typescript-types)
 - [Use Cases](#use-cases)
+- [Authentication](#authentication)
 - [Disclaimer](#disclaimer)
 
 ---
@@ -51,14 +53,13 @@ Fetch real-time and historical **Indian stock fundamentals**, **NSE/BSE financia
 ## Installation
 
 ```bash
+# npm
 npm install screener-india
-```
 
-```bash
+# yarn
 yarn add screener-india
-```
 
-```bash
+# pnpm
 pnpm add screener-india
 ```
 
@@ -85,33 +86,6 @@ console.log(data.ratios);         // Key financial ratios (ROE, ROCE, Debt/Equit
 console.log(data.peers);          // Peer comparison table
 console.log(data.analysis?.pros); // Pros listed on Screener.in
 console.log(data.analysis?.cons); // Cons listed on Screener.in
-```
-
----
-
-## Authentication
-
-Public company pages on Screener.in are accessible without login. To access **protected screens** or watchlist data, you need a session cookie from a logged-in Screener.in account.
-
-**How to get your session cookie:**
-
-1. Log in at [https://www.screener.in/login/](https://www.screener.in/login/)
-2. Open **DevTools** → **Application** → **Cookies** → `www.screener.in`
-3. Copy the value of the `sessionid` cookie
-4. Pass it to the client:
-
-```ts
-const client = new ScreenerClient({
-  cookies: "sessionid=YOUR_SESSION_ID_HERE",
-});
-```
-
-You can also include the CSRF token if needed:
-
-```ts
-const client = new ScreenerClient({
-  cookies: "sessionid=abc123; csrftoken=xyz789",
-});
 ```
 
 ---
@@ -523,9 +497,6 @@ No — public company pages, sectors, and public screens are accessible without 
 **Is this an official Screener.in API?**
 No. This is an unofficial client that scrapes public pages. Use it responsibly and respect Screener.in's terms of service.
 
-**Which exchanges are covered?**
-Both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange) listed companies are available via their respective ticker symbols.
-
 **How do I avoid rate limiting?**
 The client throttles requests to one per 200 ms by default (`minIntervalMs`). Increase it or use `cacheTtlMs` to cache repeated lookups.
 
@@ -536,8 +507,42 @@ No — the client makes direct HTTP requests to Screener.in, which does not expo
 - **Fundamentals:** Market Cap, P/E, EPS, Book Value, Dividend Yield, ROE, ROCE, Debt/Equity, Current Ratio, Quick Ratio
 - **Financials:** Quarterly results, P&L, Balance Sheet, Cash Flow, Key Ratios (10+ years of history)
 - **Shareholding:** Promoter holding, FII, DII, public, government shareholding patterns
-- **Screens:** 1000+ community-built stock screeners (value, growth, momentum, dividend, small-cap, mid-cap, large-cap)
+- **Screens:** 1,250+ public stock screeners (value, growth, momentum, dividend, small-cap, mid-cap, large-cap)
 - **Sectors:** 50+ NSE/BSE sectors with ranked company lists
+
+---
+
+## Authentication
+
+Most methods work without any login — public company pages, sectors, and public screens are freely accessible.
+
+Authentication is only needed for two cases:
+
+- **Private screens** — screens you created on Screener.in and set to private
+- **Gated company data** — the Insights tab and standalone financials on some company pages require a Screener.in login to load
+
+For everything else (public company pages, sectors, public screens), no login is required.
+
+**How to get your session cookie:**
+
+1. Log in at [https://www.screener.in/login/](https://www.screener.in/login/)
+2. Open **DevTools** → **Application** → **Cookies** → `www.screener.in`
+3. Copy the value of the `sessionid` cookie
+4. Pass it to the client:
+
+```ts
+const client = new ScreenerClient({
+  cookies: "sessionid=YOUR_SESSION_ID_HERE",
+});
+```
+
+You can also include the CSRF token if needed:
+
+```ts
+const client = new ScreenerClient({
+  cookies: "sessionid=abc123; csrftoken=xyz789",
+});
+```
 
 ---
 
